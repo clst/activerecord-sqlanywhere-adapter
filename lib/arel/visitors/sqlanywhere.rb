@@ -20,7 +20,7 @@ module Arel
       "SELECT",
       ("DISTINCT" if (o.limit || o.offset) && is_distinct),
       ("TOP #{o.limit}" if o.limit),
-      (visit(o.offset) if o.offset),
+      (visit_Arel_Nodes_Offset(o.offset) if o.offset),
       o.cores.map { |x| visit_Arel_Nodes_SelectCore x }.join,
       ("ORDER BY #{o.orders.map { |x| visit x }.join(', ')}" unless o.orders.empty?),
             #("LIMIT #{o.limit}" if o.limit),
@@ -32,7 +32,7 @@ module Arel
       def visit_Arel_Nodes_SelectCore o
         [
           "#{o.projections.map { |x| visit x }.join ', '}",
-          ("FROM #{visit o.froms}" if o.froms),
+          ("FROM #{visit o.source}" if o.source), # Joins
           ("WHERE #{o.wheres.map { |x| visit x }.join ' AND ' }" unless o.wheres.empty?),
           ("GROUP BY #{o.groups.map { |x| visit x }.join ', ' }" unless o.groups.empty?),
           (visit(o.having) if o.having),
@@ -106,4 +106,3 @@ module Arel
 end
 
 Arel::Visitors::VISITORS['sqlanywhere'] = Arel::Visitors::SQLAnywhere
-
