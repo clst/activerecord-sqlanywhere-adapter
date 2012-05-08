@@ -127,6 +127,9 @@ module ActiveRecord
 		
 		# Should override the time column values.
 		# Sybase doesn't like the time zones.
+		# use config.active_record.time_zone_aware_attributes = false for local time
+		# TODO: look into TIMESTAMP WITH TIME ZONE
+		# see binds in exec_query
 		
     end
     
@@ -649,13 +652,11 @@ SQL
               bind_param.set_direction(1) # https://github.com/sqlanywhere/sqlanywhere/blob/master/ext/sacapi.h#L175
               if bind_value.nil?
                 bind_param.set_value(nil)
-              elsif bind_type == :datetime
-                bind_param.set_value(bind_value.to_datetime.to_s :db)
+              elsif [:datetime, :date].include? bind_type
+                bind_param.set_value(bind_value.to_s :db)
               elsif bind_type == :boolean
                 bind_param.set_value(bind_value ? 1 : 0)
               elsif bind_type == :decimal
-                bind_param.set_value(bind_value.to_s)
-              elsif bind_type == :date
                 bind_param.set_value(bind_value.to_s)
               else
                 bind_param.set_value(bind_value)
