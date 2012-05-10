@@ -11,11 +11,6 @@ module Arel
     o.limit = o.limit.expr if(o.limit.is_a?(Arel::Nodes::Limit))
     o.limit = o.limit if(o.limit.is_a?(Fixnum))
 
-    if (o.limit || o.offset) && is_distinct
-      o.cores.map { |cores| cores.projections.first.gsub!('DISTINCT', '') }
-      #{ |projection| /DISTINCT/ === projection}}
-    end
-
     [
       "SELECT",
       ("DISTINCT" if (o.limit || o.offset) && is_distinct),
@@ -46,10 +41,8 @@ module Arel
 
 
   def using_distinct?(o)
-    o.cores.any? do |cores|
-      cores.projections.any? do |projection|
-        /DISTINCT/ === projection
-      end
+    o.cores.any? do |core|
+      core.set_quantifier.class == Arel::Nodes::Distinct
     end
   end      
 
