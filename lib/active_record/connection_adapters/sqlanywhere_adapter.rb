@@ -679,7 +679,9 @@ SQL
             for i in 0...num_cols
               result, col_num, name, ruby_type, native_type, precision, scale, max_size, nullable = SA.instance.api.sqlany_get_column_info(stmt, i)
               sqlanywhere_error_test(sql) if result==0
-              fields << name
+              #always use database encoding for the column names (like in SQLite)
+	      #this fixes to_yaml outputting all column names with !binary
+	      fields << name.force_encoding(ActiveRecord::Base.configurations[Rails.env]['encoding'])
               native_types << native_type
             end
             rows = []
